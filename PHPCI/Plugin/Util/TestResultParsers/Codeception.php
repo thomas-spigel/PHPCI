@@ -27,6 +27,7 @@ class Codeception implements ParserInterface
      */
     public function __construct(Builder $phpci, $resultsXml)
     {
+        ini_set('error_reporting', false);
         $this->phpci = $phpci;
         $this->resultsXml = $resultsXml;
 
