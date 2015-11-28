@@ -36,6 +36,12 @@
 
                         </td>
                     </tr>
+                    <tr>
+                        <th>Docker Instance</th>
+                        <td style="text-align: right">
+                            <?php echo (isset($docker) ? $docker->getDockerImage() : 'None');?>
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>

@@ -64,6 +64,11 @@ class BuildController extends \PHPCI\Controller
         $this->view->plugins  = $this->getUiPlugins();
         $this->view->build    = $build;
         $this->view->data     = $this->getBuildData($build);
+        if($build->getExtra('docker')) {
+            $dockerId = $build->getExtra('docker');
+
+            $this->view->docker = b8\Store\Factory::getStore('Docker')->getByPrimaryKey($dockerId);
+        }
 
         $this->layout->title = Lang::get('build_n', $buildId);
         $this->layout->subtitle = $build->getProjectTitle();

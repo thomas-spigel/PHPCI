@@ -84,7 +84,7 @@ class DockerCreateBuildCommand extends Command
         {
             $output->writeln('Creating Docker build');
             try {
-                $this->buildService->createBuild($project, $commitId, $branch, null, null, 'docker.' . $dockerImage->getId());
+                $this->buildService->createBuild($project, $commitId, $branch, null, null, ['docker' => $dockerImage->getId()]);
                 $output->writeln(Lang::get('build_created'));
             } catch (\Exception $e) {
                 $output->writeln(sprintf('<error>%s</error>', Lang::get('failed')));

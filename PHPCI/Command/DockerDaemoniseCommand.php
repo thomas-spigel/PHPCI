@@ -93,10 +93,10 @@ class DockerDaemoniseCommand extends Command
                     /** @var \PHPCI\Store\BuildStore $build */
                     $build = array_shift($result['items']);
                     if(!$build) continue;
-                    if(stristr($build->getExtra(), 'docker.')) {
-                        $docker = Factory::getStore('Docker')->getByPrimaryKey(trim(explode('.', $build->getExtra())[1]));
+                    if($build->getExtra('docker')) {
+                        $docker = Factory::getStore('Docker')->getByPrimaryKey($build->getExtra('docker'));
 
-                        $command = 'docker run --net=host -v ' . $build->getProject()->getReference() . ':' . $build->getProject()->getReference() . ' -v ' . getcwd() . ':/usr/src/myapp -w /usr/src/myapp -v /var/run/mysqld:/var/run/mysqld ' . $docker->getDockerImage() . ' ./console phpci:run ' . $build->getId();
+                        $command = 'docker run --net=host -v ' . $build->getProject()->getReference() . ':' . $build->getProject()->getReference() . ' -v ' . getcwd() . ':/usr/src/myapp -w /usr/src/myapp -v /var/run/mysqld:/var/run/mysqld ' . $docker->getDockerImage() . ' ./console phpci:docker-run ' . $build->getId();
                         echo $command;
 
                         $this->logger->addInfo(sprintf('Running build on docker instance %s', $docker->getDockerImage()));
