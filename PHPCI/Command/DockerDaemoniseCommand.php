@@ -84,6 +84,7 @@ class DockerDaemoniseCommand extends Command
 
             $buildCount = 0;
 
+            $options = '';
             try {
 
                 $this->logger->addInfo('Finding next build and checking if it\'s a docker build...');
@@ -96,8 +97,12 @@ class DockerDaemoniseCommand extends Command
                     if($build->getExtra('docker')) {
                         $docker = Factory::getStore('Docker')->getByPrimaryKey($build->getExtra('docker'));
 
-                        $command = 'docker run --net=host -v ' . $build->getProject()->getReference() . ':' . $build->getProject()->getReference() . ' -v ' . getcwd() . ':/usr/src/myapp -w /usr/src/myapp -v /var/run/mysqld:/var/run/mysqld ' . $docker->getDockerImage() . ' ./console phpci:docker-run ' . $build->getId();
-                        echo $command;
+                        $this->logger->info('Project type: ' . $build->getProject()->getType());
+                        if($build->getProject()->getType() == 'local') {
+                            $options = ' -v ' . $build->getProject()->getReference() . ':' . $build->getProject()->getReference();
+                        }
+                        $command = 'docker run --net=host ' . $options . ' -v ' . getcwd() . ':/usr/src/myapp -w /usr/src/myapp -v /var/run/mysqld:/var/run/mysqld ' . $docker->getDockerImage() . ' ./console phpci:docker-run ' . $build->getId();
+//                        echo $command;
 
                         $this->logger->addInfo(sprintf('Running build on docker instance %s', $docker->getDockerImage()));
 

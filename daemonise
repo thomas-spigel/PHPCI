@@ -13,8 +13,10 @@ define('PHPCI_IS_CONSOLE', true);
 require('bootstrap.php');
 
 use PHPCI\Command\DaemoniseCommand;
+use PHPCI\Command\DockerDaemoniseCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();
 $application->add(new DaemoniseCommand($loggerConfig->getFor('DaemoniseCommand')));
+$application->add(new DockerDaemoniseCommand($loggerConfig->getFor('DaemoniseCommand')));
 $application->run();

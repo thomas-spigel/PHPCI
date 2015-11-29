@@ -1,4 +1,6 @@
 FROM php:5.4-apache
 RUN docker-php-ext-install mysql mysqli pdo pdo_mysql
 RUN cp /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
-
+RUN apt-get update && apt-get install -y git
+RUN git config --global user.name "PHPCI"
+RUN git config --global user.email "hello@php.ci"
