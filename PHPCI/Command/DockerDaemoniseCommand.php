@@ -90,7 +90,7 @@ class DockerDaemoniseCommand extends Command
                 $this->logger->addInfo('Finding next build and checking if it\'s a docker build...');
                 $store = Factory::getStore('Build');
                 $result = $store->getByStatus(0, 1);
-                if(count($result['items'] > 0)) {
+                if(count($result['items']) > 0) {
                     /** @var \PHPCI\Store\BuildStore $build */
                     $build = array_shift($result['items']);
                     if(!$build) continue;

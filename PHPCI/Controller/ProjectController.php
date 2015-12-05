@@ -134,6 +134,37 @@ class ProjectController extends PHPCI\Controller
         return $response;
     }
 
+
+    public function dockerbuild($projectId, $branch = '')
+    {
+        /* @var \PHPCI\Model\Project $project */
+        $project = $this->projectStore->getById($projectId);
+
+        if (empty($branch)) {
+            $branch = $project->getBranch();
+        }
+
+        if (empty($project)) {
+            throw new NotFoundException(Lang::get('project_x_not_found', $projectId));
+        }
+
+        $email = $_SESSION['phpci_user']->getEmail();
+
+        /** @var \PHPCI\Store\Docker $store */
+        $store = Store\Factory::getStore('Docker');
+
+        $dockerImages = $store->getByProjectId($projectId);
+
+        foreach($dockerImages as $dockerImage)
+        {
+            $build = $this->buildService->createBuild($project, null, urldecode($branch), $email, null, ['docker' => $dockerImage->getId()]);
+        }
+
+        $response = new b8\Http\Response\RedirectResponse();
+        $response->setHeader('Location', PHPCI_URL.'project/view/' . $project->getId());
+        return $response;
+    }
+
     /**
     * Delete a project.
     */
@@ -234,9 +265,16 @@ class ProjectController extends PHPCI\Controller
                 'allow_public_status' => $this->getParam('allow_public_status', 0),
                 'branch' => $this->getParam('branch', null),
                 'group' => $this->getParam('group_id', null),
+
+                'php:5.4-apache' => $this->getParam('php54-apache'),
+                'php:5.5-apache' => $this->getParam('php55-apache'),
+                'php:5.6-apache' => $this->getParam('php56-apache'),
+                'php:7.0-apache' => $this->getParam('php70-apache'),
             );
 
             $project = $this->projectService->createProject($title, $type, $reference, $options);
+
+            $docker = $this->dockerService->updateDocker($project->getId(), $options);
 
             $response = new b8\Http\Response\RedirectResponse();
             $response->setHeader('Location', PHPCI_URL.'project/view/' . $project->getId());

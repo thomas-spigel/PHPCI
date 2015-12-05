@@ -18,6 +18,10 @@
             <?php Lang::out('build_now'); ?>
         </a>
 
+        <a class="btn btn-success" href="<?php print PHPCI_URL . 'project/dockerbuild/' . $project->getId(); ?><?php echo !empty($branch) ? '/' . urlencode($branch) : '' ?>">
+            <?php Lang::out('docker_build'); ?>
+        </a>
+
         <div class="btn-group branch-btn pull-right">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                 <?php print !empty($branch) ? Lang::get('branch_x', $branch) : Lang::get('branch'); ?>&nbsp;&nbsp;<span class="caret"></span>
