@@ -8,6 +8,9 @@ use PHPCI\Store;
 class DockerStore extends Store
 {
 
+    protected $primaryKey  = 'id';
+    protected $tableName   = 'docker';
+    protected $modelName   = '\PHPCI\Model\Docker';
     /**
      * Get a Docker image by primary key (Id)
      */
@@ -60,6 +63,21 @@ class DockerStore extends Store
         } else {
             return array();
         }
+    }
+
+    public function deleteByProjectId($projectId, $useConnection = 'write')
+    {
+
+        $query = "DELETE FROM docker WHERE project_id = :project";
+
+        $stmt = Database::getConnection($useConnection)->prepare($query);
+
+        $stmt->bindValue(':project', $projectId, \PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $this;
+
     }
 
 }

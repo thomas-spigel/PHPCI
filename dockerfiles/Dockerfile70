@@ -1,0 +1,7 @@
+FROM php:7.0-apache
+RUN apt-get update && apt-get install -y libpng12-dev git libmcrypt-dev libicu-dev libxslt1-dev
+RUN docker-php-ext-install mysqli pdo pdo_mysql gd mcrypt intl xsl mbstring
+RUN cp /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+RUN git config --global user.name "PHPCI"
+RUN git config --global user.email "hello@php.ci"
+

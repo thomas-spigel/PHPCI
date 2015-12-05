@@ -20,6 +20,7 @@ use PHPCI\Helper\Lang;
 use PHPCI\Helper\SshKey;
 use PHPCI\Service\BuildService;
 use PHPCI\Service\ProjectService;
+use PHPCI\Service\DockerService;
 
 /**
 * Project Controller - Allows users to create, edit and view projects.
@@ -50,14 +51,26 @@ class ProjectController extends PHPCI\Controller
     protected $buildService;
 
     /**
+     * @var \PHPCI\Store\DockerStore
+     */
+    protected $dockerStore;
+
+    /**
+     * @var \PHPCI\Service\DockerService
+     */
+    protected $dockerService;
+
+    /**
      * Initialise the controller, set up stores and services.
      */
     public function init()
     {
         $this->buildStore = Store\Factory::getStore('Build');
         $this->projectStore = Store\Factory::getStore('Project');
+        $this->dockerStore = Store\Factory::getStore('Docker');
         $this->projectService = new ProjectService($this->projectStore);
         $this->buildService = new BuildService($this->buildStore);
+        $this->dockerService = new DockerService($this->dockerStore);
     }
 
     /**
@@ -286,10 +299,18 @@ class ProjectController extends PHPCI\Controller
             'archived' => $this->getParam('archived', 0),
             'branch' => $this->getParam('branch', null),
             'group' => $this->getParam('group_id', null),
+
+            'php:5.4-apache' => $this->getParam('php54-apache'),
+            'php:5.5-apache' => $this->getParam('php55-apache'),
+            'php:5.6-apache' => $this->getParam('php56-apache'),
+            'php:7.0-apache' => $this->getParam('php70-apache'),
         );
 
         $project = $this->projectService->updateProject($project, $title, $type, $reference, $options);
 
+        $docker = $this->dockerService->updateDocker($project->getId(), $options);
+
+//        die();
         $response = new b8\Http\Response\RedirectResponse();
         $response->setHeader('Location', PHPCI_URL.'project/view/' . $project->getId());
         return $response;
@@ -367,6 +388,25 @@ class ProjectController extends PHPCI\Controller
 
         $field->setOptions($groups);
         $form->addField($field);
+
+        $container = new Form\Element\CheckboxGroup('docker-instances');
+        $container->setLabel("Docker Instances");
+        $container->setClass('form-group');
+
+        $field = Form\Element\Checkbox::create('php:5.4-apache', 'PHP version 5.4 with apache');
+        $field->setCheckedValue('php:5.4-apache');
+        $container->addField($field);
+        $field = Form\Element\Checkbox::create('php:5.5-apache', 'PHP version 5.5 with apache');
+        $field->setCheckedValue('php:5.5-apache');
+        $container->addField($field);
+        $field = Form\Element\Checkbox::create('php:5.6-apache', 'PHP version 5.6 with apache');
+        $field->setCheckedValue('php:5.6-apache');
+        $container->addField($field);
+        $field = Form\Element\Checkbox::create('php:7.0-apache', 'PHP version 7.0 with apache');
+        $field->setCheckedValue('php:7.0-apache');
+        $container->addField($field);
+        $form->addField($container);
+
 
         $field = Form\Element\Checkbox::create('allow_public_status', Lang::get('allow_public_status'), false);
         $field->setContainerClass('form-group');

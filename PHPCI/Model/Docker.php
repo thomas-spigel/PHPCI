@@ -193,6 +193,7 @@ class Docker extends Model
         $this->data['project_id'] = $value;
 
         $this->_setModified('project_id');
+        return $this;
     }
 
 
@@ -223,6 +224,7 @@ class Docker extends Model
         $this->data['docker_image'] = $value;
 
         $this->_setModified('docker_image');
+        return $this;
     }
 
 

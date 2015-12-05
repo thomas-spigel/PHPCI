@@ -97,11 +97,12 @@ class DockerDaemoniseCommand extends Command
                     if($build->getExtra('docker')) {
                         $docker = Factory::getStore('Docker')->getByPrimaryKey($build->getExtra('docker'));
 
-                        $this->logger->info('Project type: ' . $build->getProject()->getType());
+                        $this->output->writeln('Project type: ' . $build->getProject()->getType());
                         if($build->getProject()->getType() == 'local') {
                             $options = ' -v ' . $build->getProject()->getReference() . ':' . $build->getProject()->getReference();
+                            $this->output->writeln('Adding option for link on the docker image: ' . $options);
                         }
-                        $command = 'docker run --net=host ' . $options . ' -v ' . getcwd() . ':/usr/src/myapp -w /usr/src/myapp -v /var/run/mysqld:/var/run/mysqld ' . $docker->getDockerImage() . ' ./console phpci:docker-run ' . $build->getId();
+                        $command = 'docker run --net=host ' . $options . ' -v ' . getcwd() . ':/var/www/phpci -w /var/www/phpci -v /var/run/mysqld:/var/run/mysqld ' . $docker->getDockerImage() . ' ./console phpci:docker-run ' . $build->getId();
 //                        echo $command;
 
                         $this->logger->addInfo(sprintf('Running build on docker instance %s', $docker->getDockerImage()));
