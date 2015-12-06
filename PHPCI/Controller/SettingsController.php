@@ -76,12 +76,18 @@ class SettingsController extends Controller
             $authSettings = $this->settings['phpci']['authentication_settings'];
         }
 
+        $dockerSettings = array();
+        if(isset($this->settings['phpci']['docker_settings'])) {
+            $dockerSettings = $this->settings['phpci']['docker_settings'];
+        }
+
         $this->view->configFile = PHPCI_CONFIG_FILE;
         $this->view->basicSettings = $this->getBasicForm($basicSettings);
         $this->view->buildSettings = $this->getBuildForm($buildSettings);
         $this->view->github = $this->getGithubForm();
         $this->view->emailSettings = $this->getEmailForm($emailSettings);
         $this->view->authenticationSettings = $this->getAuthenticationForm($authSettings);
+        $this->view->dockerSettings = $this->getDockerForm($dockerSettings);
         $this->view->isWriteable = $this->canWriteConfig();
 
         if (!empty($this->settings['phpci']['github']['token'])) {
@@ -188,6 +194,31 @@ class SettingsController extends Controller
 
         $this->settings['phpci']['authentication_settings']['state']   = $this->getParam('disable_authentication', 0);
         $this->settings['phpci']['authentication_settings']['user_id'] = $_SESSION['phpci_user_id'];
+
+        $error = $this->storeSettings();
+
+        $response = new b8\Http\Response\RedirectResponse();
+
+        if ($error) {
+            $response->setHeader('Location', PHPCI_URL . 'settings?saved=2');
+        } else {
+            $response->setHeader('Location', PHPCI_URL . 'settings?saved=1');
+        }
+
+        return $response;
+    }
+
+
+    /**
+     * Docker Settings handler
+     * @return b8\Http\Response\RedirectResponse
+     * @throws b8\Exception\HttpException\ForbiddenException
+     */
+    public function docker()
+    {
+        $this->requireAdmin();
+
+        $this->settings['phpci']['docker_settings']['enable_docker_support']   = $this->getParam('enable_docker_support', 0);
 
         $error = $this->storeSettings();
 
@@ -416,6 +447,31 @@ class SettingsController extends Controller
         $field->setValue(1800);
         $form->addField($field);
 
+
+        $field = new Form\Element\Submit();
+        $field->setValue(Lang::get('save'));
+        $field->setClass('btn btn-success pull-right');
+        $form->addField($field);
+
+        $form->setValues($values);
+
+        return $form;
+    }
+
+    protected function getDockerForm($values = array())
+    {
+        $form = new Form();
+        $form->setMethod('POST');
+        $form->setAction(PHPCI_URL . 'settings/docker');
+
+        $field = new Form\Element\Checkbox('enable_docker_support');
+        $field->setCheckedValue(1);
+        $field->setRequired(false);
+        $field->setLabel('Enable docker support');
+        $field->setContainerClass('form-group');
+        $field->setValue(0);
+
+        $form->addField($field);
 
         $field = new Form\Element\Submit();
         $field->setValue(Lang::get('save'));

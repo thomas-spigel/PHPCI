@@ -132,4 +132,19 @@ class DockerStore extends Store
 
         return $this;
     }
+
+
+    public function getCount($useConnection = 'read')
+    {
+        $query = 'SELECT count(*) FROM docker';
+
+        $stmt = Database::getConnection($useConnection)->prepare($query);
+
+        if($stmt->execute()) {
+            $count = $stmt->fetch(\PDO::FETCH_COLUMN);
+            return $count;
+        }
+
+        return 0;
+    }
 }

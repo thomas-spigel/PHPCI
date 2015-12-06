@@ -1,0 +1,107 @@
+<?php use PHPCI\Helper\Lang; ?>
+<div class="row">
+    <div class="col-lg-12 col-md-5 col-sm-8">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title"><?php Lang::out('docker_images'); ?> (<?php print $total; ?>)</h3>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th><?php Lang::out('id'); ?></th>
+                    <th><?php Lang::out('date'); ?></th>
+                    <th><?php Lang::out('name'); ?></th>
+                    <th><?php Lang::out('docker_image'); ?></th>
+                    <th style="width: 100px"></th>
+                </tr>
+                </thead>
+                <tbody id="docker-images">
+                <?php /** @var \PHPCI\Model\Docker $image */ ?>
+                <?php foreach($images as $image) :?>
+                    <tr class="active">
+                        <td><a href="<?php echo PHPCI_URL ?>docker/view/<?php print $image->getId(); ?>">#<?php print str_pad($image->getId(), 6, '0', STR_PAD_LEFT) ?></a></td>
+                        <td><?php print $image->getCreatedDate()->format('Y-m-d H:i:s'); ?></td>
+                        <td><a href="<?php echo PHPCI_URL ?>docker/view/<?php print $image->getId(); ?>">
+                                <?php echo $image->getName(); ?>
+                            </a>
+                        </td>
+                        <td>
+                                <?php echo $image->getDockerImage(); ?>
+                        </td>
+
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-default btn-sm" href="<?php echo PHPCI_URL ?>docker/view/<?php print $image->getId(); ?>"><?php Lang::out('view'); ?></a>
+                                <?php if($this->User()->getIsAdmin()): ?>
+                                    <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="<?php echo PHPCI_URL ?>docker/delete/<?php print $image->getId(); ?>" class="phpci-app-delete-image"><?php Lang::out('delete'); ?></a></li>
+                                    </ul>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+
+                <?php endforeach;?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<?php
+return;
+print '<div><ul class="pagination">';
+
+$list_url = PHPCI_URL . 'docker/images/' . $docker->getId();
+
+if ($page > 1) {
+    print '<li><a href="' . $list_url . '?p='.($page == 1 ? '1' : $page - 1).'">'.Lang::get('prev_link').'</a></li>';
+}
+
+if ($pages > 1) {
+
+    $start = $page - 3;
+
+    if ($start <= 0) {
+        $start = 1;
+    }
+
+    $end = $page + 3;
+
+    if ($end > $pages) {
+        $end = $pages;
+    }
+
+    if ($start > 1) {
+        print '<li><a href="' . $list_url . '">1...</a></li>';
+    }
+
+    for($i = $start; $i <= $end; $i++)
+    {
+        if ($pages > $end && $i == $pages) continue;
+
+        if ($i == $page) {
+            print '<li class="bg-blue"><span>' . $i . '</span></li>';
+        } else {
+            print '<li><a href="' . $list_url . '?p=' . $i . '">' . $i . '</a></li>';
+        }
+    }
+
+    if ($pages > $end) {
+        print '<li><a href="' . $list_url . '?p='.$pages.'">...'.$pages.'</a></li>';
+    }
+}
+
+
+
+if ($page < $pages - 1) {
+    print '<li><a href="' . $list_url . '?p='.($page == $pages ? $pages : $page + 1).'">'.Lang::get('next_link').'</a></li>';
+}
+
+
+
+print '</ul></div>';
+
+?>
