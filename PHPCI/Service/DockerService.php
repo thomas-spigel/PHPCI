@@ -2,7 +2,9 @@
 
 namespace PHPCI\Service;
 
+use b8\Store\Factory;
 use PHPCI\Model\Docker;
+use PHPCI\Model\ProjectDocker;
 use PHPCI\Store\DockerStore;
 
 class DockerService
@@ -13,13 +15,6 @@ class DockerService
     protected $dockerStore;
 
 
-    protected $instances = [
-        'php:5.4-apache',
-        'php:5.5-apache',
-        'php:5.6-apache',
-        'php:7.0-apache',
-    ];
-
     public function __construct(DockerStore $dockerStore)
     {
         $this->dockerStore = $dockerStore;
@@ -28,19 +23,14 @@ class DockerService
 
     public function updateDocker($projectId, $options)
     {
-        $this->dockerStore->deleteByProjectId($projectId);
+        $this->dockerStore->deleteLinksByProjectId($projectId);
 
-        foreach ($this->instances as $dockerInstance)
+        foreach($options as $dockerId)
         {
-            if (array_key_exists($dockerInstance, $options) && !empty($options[$dockerInstance])) {
-                $newInstance = new Docker();
-                $newInstance->setName($dockerInstance)
-                    ->setDockerImage($dockerInstance)
-                    ->setProjectId($projectId);
-                $this->dockerStore->save($newInstance);
-            }
+            $store = Factory::getStore('ProjectDocker');
+            $docker = new ProjectDocker(['project_id' => $projectId, 'docker_id' => $dockerId]);
+            $store->save($docker,true);
         }
         return $this;
-
     }
 }

@@ -33,18 +33,24 @@ class Docker extends AbstractMigration
             $table->create();
         }
 
-        $table->addColumn('project_id', 'integer', array('signed' => false));
         $table->addColumn('name', 'string', array('limit' => 255, 'null' => true));
         $table->addColumn('docker_image', 'string', ['limit' => 255, 'null' => true]);
+        $table->addColumn('dockerfile', 'text', array('null' => true));
         $table->addColumn('created_date', 'datetime');
         if (!$table->hasIndex(array('id'))) {
             $table->addIndex(array('id'));
         }
-        if (!$table->hasIndex(array('project_id'))) {
-            $table->addIndex(array('project_id'));
-        }
-        $table->addForeignKey('project_id', 'project', 'id', array('delete'=> 'CASCADE', 'update' => 'CASCADE'));
         $table->save();
 
+
+        $table = $this->table('project_docker', ['primary_key' => ['project_id', 'docker_id']]);
+
+        if (!$this->hasTable('project_docker')) {
+//            $table->create();
+        }
+
+        $table->addColumn('project_id', 'integer');
+        $table->addColumn('docker_id', 'integer');
+        $table->save();
     }
 }

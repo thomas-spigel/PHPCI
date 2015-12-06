@@ -129,6 +129,7 @@ PHPCI',
     // View Project:
     'all_branches' => 'All Branches',
     'builds' => 'Builds',
+    'docker_build' => 'Build with Docker',
     'id' => 'ID',
     'date' => 'Date',
     'project' => 'Project',

@@ -106,4 +106,38 @@ class ProjectStore extends ProjectStoreBase
             return array('items' => array(), 'count' => 0);
         }
     }
+
+
+    /**
+     * Get all projects by docker ID
+     *
+     * @param $dockerId
+     * @param string $useConnection
+     * @return array
+     * @throws \Exception
+     */
+    public function getByDockerId($dockerId, $useConnection = 'read')
+    {
+        $query = "SELECT project.* FROM project
+                  LEFT JOIN project_docker ON (project.id = project_docker.project_id)
+                  WHERE project_docker.docker_id = :docker";
+
+        $stmt = Database::getConnection('read')->prepare($query);
+
+        $stmt->bindValue(':docker', $dockerId, \PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            $res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $map = function ($item) {
+                return new Project($item);
+            };
+            $rtn = array_map($map, $res);
+
+            return $rtn;
+        } else {
+            return array();
+        }
+    }
+
 }

@@ -10,10 +10,12 @@
 
 <?php
     $dockerImage = '';
-    if($build->getExtra('docker')) {
+    if ($build->getExtra('docker')) {
         $docker = \b8\Store\Factory::getStore('Docker')->getByPrimaryKey($build->getExtra('docker'));
 
-        $dockerImage = '.' . $docker->getDockerImage();
+        if ($docker) {
+            $dockerImage = '.' . $docker->getDockerImage();
+        }
     }
 switch($build->getStatus())
 {

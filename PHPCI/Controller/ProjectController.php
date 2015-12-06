@@ -150,7 +150,7 @@ class ProjectController extends PHPCI\Controller
 
         $email = $_SESSION['phpci_user']->getEmail();
 
-        /** @var \PHPCI\Store\Docker $store */
+        /** @var \PHPCI\Store\DockerStore $store */
         $store = Store\Factory::getStore('Docker');
 
         $dockerImages = $store->getByProjectId($projectId);
@@ -267,15 +267,13 @@ class ProjectController extends PHPCI\Controller
                 'branch' => $this->getParam('branch', null),
                 'group' => $this->getParam('group_id', null),
 
-                'php:5.4-apache' => $this->getParam('php54-apache'),
-                'php:5.5-apache' => $this->getParam('php55-apache'),
-                'php:5.6-apache' => $this->getParam('php56-apache'),
-                'php:7.0-apache' => $this->getParam('php70-apache'),
             );
+
 
             $project = $this->projectService->createProject($title, $type, $reference, $options);
 
-            $this->dockerService->updateDocker($project->getId(), $options);
+            $dockerOptions = $this->getDockerOptions();
+            $this->dockerService->updateDocker($project->getId(), $dockerOptions);
 
             $response = new b8\Http\Response\RedirectResponse();
             $response->setHeader('Location', PHPCI_URL.'project/view/' . $project->getId());
@@ -339,15 +337,12 @@ class ProjectController extends PHPCI\Controller
             'branch' => $this->getParam('branch', null),
             'group' => $this->getParam('group_id', null),
 
-            'php:5.4-apache' => $this->getParam('php54-apache'),
-            'php:5.5-apache' => $this->getParam('php55-apache'),
-            'php:5.6-apache' => $this->getParam('php56-apache'),
-            'php:7.0-apache' => $this->getParam('php70-apache'),
         );
 
         $project = $this->projectService->updateProject($project, $title, $type, $reference, $options);
 
-        $this->dockerService->updateDocker($project->getId(), $options);
+        $dockerOptions = $this->getDockerOptions();
+        $this->dockerService->updateDocker($project->getId(), $dockerOptions);
 
         $response = new b8\Http\Response\RedirectResponse();
         $response->setHeader('Location', PHPCI_URL.'project/view/' . $project->getId());
@@ -428,7 +423,7 @@ class ProjectController extends PHPCI\Controller
         $form->addField($field);
 
 
-        $container = $this->_getDockerContainer();
+        $container = $this->getDockerContainer();
         $form->addField($container);
 
 
@@ -454,24 +449,20 @@ class ProjectController extends PHPCI\Controller
         return $form;
     }
 
-    protected function _getDockerContainer()
+    protected function getDockerContainer()
     {
         $container = new Form\Element\CheckboxGroup('docker-instances');
         $container->setLabel("Docker Instances");
         $container->setClass('form-group');
 
-        $field = Form\Element\Checkbox::create('php:5.4-apache', 'PHP version 5.4 with apache');
-        $field->setCheckedValue('php:5.4-apache');
-        $container->addField($field);
-        $field = Form\Element\Checkbox::create('php:5.5-apache', 'PHP version 5.5 with apache');
-        $field->setCheckedValue('php:5.5-apache');
-        $container->addField($field);
-        $field = Form\Element\Checkbox::create('php:5.6-apache', 'PHP version 5.6 with apache');
-        $field->setCheckedValue('php:5.6-apache');
-        $container->addField($field);
-        $field = Form\Element\Checkbox::create('php:7.0-apache', 'PHP version 7.0 with apache');
-        $field->setCheckedValue('php:7.0-apache');
-        $container->addField($field);
+        /** @var PHPCI\Store\DockerStore $dockerStore */
+        $dockerStore = Store\Factory::getStore('Docker');
+        foreach ($dockerStore->getAll() as $docker)
+        {
+            $field = Form\Element\Checkbox::create($docker->getDockerImage(), $docker->getName());
+            $field->setCheckedValue($docker->getDockerImage());
+            $container->addField($field);
+        }
 
         return $container;
     }
@@ -529,5 +520,28 @@ class ProjectController extends PHPCI\Controller
 
             return true;
         };
+    }
+
+
+    /**
+     * @return array
+     */
+    protected function getDockerOptions()
+    {
+        $dockerOptions = [];
+        /** @var PHPCI\Store\DockerStore $dockerStore */
+        $dockerStore = Store\Factory::getStore('Docker');
+
+        foreach ($dockerStore->getAll() as $dockerImage) {
+
+            // about this: had to remove the . and : characters because they are stripped for input names
+            $dockerParam = $this->getParam(str_replace(['.', ':'], '', $dockerImage->getDockerImage()));
+
+            if($dockerParam) {
+                $dockerOptions[] = $dockerImage->getId();
+            }
+        }
+
+        return $dockerOptions;
     }
 }
