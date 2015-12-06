@@ -18,9 +18,11 @@
             <?php Lang::out('build_now'); ?>
         </a>
 
+        <?php if(\b8\Config::getInstance()->get('phpci.docker_settings.enable_docker_support') == 1): ?>
         <a class="btn btn-success" href="<?php print PHPCI_URL . 'project/dockerbuild/' . $project->getId(); ?><?php echo !empty($branch) ? '/' . urlencode($branch) : '' ?>">
             <?php Lang::out('docker_build'); ?>
         </a>
+        <?php endif;?>
 
         <div class="btn-group branch-btn pull-right">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">

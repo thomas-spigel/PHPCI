@@ -66,6 +66,11 @@ class DockerCreateBuildCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        if(\b8\Config::getInstance()->get('phpci.docker_settings.enable_docker_support') != 1) {
+            $output->writeln('Docker support is disabled. Exiting.');
+            return;
+        }
+
         $projectId = $input->getArgument('projectId');
         $project = $this->projectStore->getById($projectId);
         if (empty($project)) {

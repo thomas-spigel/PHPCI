@@ -182,7 +182,7 @@
                                     <i class="fa fa-angle-double-right"></i> <?php Lang::out('plugins'); ?>
                                 </a>
                             </li>
-                            <?php if($token = \b8\Config::getInstance()->get('phpci.docker_settings.enable_docker_support') == 1): ?>
+                            <?php if(\b8\Config::getInstance()->get('phpci.docker_settings.enable_docker_support') == 1): ?>
                             <li>
                                 <a href="<?php print PHPCI_URL; ?>docker">
                                    <i class="fa fa-angle-double-right"></i> Docker

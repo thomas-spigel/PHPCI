@@ -150,7 +150,7 @@ class ProjectController extends PHPCI\Controller
 
         $email = $_SESSION['phpci_user']->getEmail();
 
-        /** @var \PHPCI\Store\DockerStore $store */
+        /** @var \PHPCI\Store\Docker $store */
         $store = Store\Factory::getStore('Docker');
 
         $dockerImages = $store->getByProjectId($projectId);
@@ -421,11 +421,11 @@ class ProjectController extends PHPCI\Controller
 
         $field->setOptions($groups);
         $form->addField($field);
-
-
-        $container = $this->getDockerContainer();
-        $form->addField($container);
-
+        
+        if(\b8\Config::getInstance()->get('phpci.docker_settings.enable_docker_support') == 1) {
+            $container = $this->getDockerContainer($values);
+            $form->addField($container);
+        }
 
         $field = Form\Element\Checkbox::create('allow_public_status', Lang::get('allow_public_status'), false);
         $field->setContainerClass('form-group');
@@ -449,7 +449,7 @@ class ProjectController extends PHPCI\Controller
         return $form;
     }
 
-    protected function getDockerContainer()
+    protected function getDockerContainer($values)
     {
         $container = new Form\Element\CheckboxGroup('docker-instances');
         $container->setLabel("Docker Instances");
@@ -461,8 +461,11 @@ class ProjectController extends PHPCI\Controller
         {
             $field = Form\Element\Checkbox::create($docker->getDockerImage(), $docker->getName());
             $field->setCheckedValue($docker->getDockerImage());
+            $field->setValue(0);
             $container->addField($field);
         }
+
+        $container->setValues($values);
 
         return $container;
     }

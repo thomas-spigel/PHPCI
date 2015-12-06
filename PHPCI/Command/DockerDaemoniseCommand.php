@@ -67,6 +67,11 @@ class DockerDaemoniseCommand extends Command
     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if(\b8\Config::getInstance()->get('phpci.docker_settings.enable_docker_support') != 1) {
+            $output->writeln('Docker support is disabled. Exiting.');
+            return;
+        }
+
         $cmd = "echo %s > '%s/daemon/daemon.pid'";
         $command = sprintf($cmd, getmypid(), PHPCI_DIR);
         exec($command);
