@@ -201,7 +201,7 @@ class Docker extends Model
     {
         $this->_validateString('Name', $value);
 
-        if($this->data['name'] === $value) {
+        if ($this->data['name'] === $value) {
             return;
         }
 
@@ -217,7 +217,7 @@ class Docker extends Model
     {
         $this->_validateString('Docker Image', $value);
 
-        if($this->data['docker_image'] === $value) {
+        if ($this->data['docker_image'] === $value) {
             return;
         }
 
@@ -284,6 +284,4 @@ class Docker extends Model
     {
         return $this->setProjectId($value->getId());
     }
-
-
 }

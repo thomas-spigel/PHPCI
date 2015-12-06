@@ -13,9 +13,7 @@ class Docker implements \PHPCI\Plugin
 
 
         if (isset($buildSettings['docker'])) {
-            $docker = $buildSettings['docker'];
-
-
+//            $docker = $buildSettings['docker'];
         }
     }
 

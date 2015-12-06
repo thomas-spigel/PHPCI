@@ -13,7 +13,7 @@ class DockerService
     protected $dockerStore;
 
 
-    protected $_instances = [
+    protected $instances = [
         'php:5.4-apache',
         'php:5.5-apache',
         'php:5.6-apache',
@@ -28,13 +28,11 @@ class DockerService
 
     public function updateDocker($projectId, $options)
     {
-        $allowedDockerInstances = [];
-
         $this->dockerStore->deleteByProjectId($projectId);
 
-        foreach($this->_instances as $dockerInstance)
+        foreach ($this->instances as $dockerInstance)
         {
-            if(array_key_exists($dockerInstance, $options) && !empty($options[$dockerInstance])) {
+            if (array_key_exists($dockerInstance, $options) && !empty($options[$dockerInstance])) {
                 $newInstance = new Docker();
                 $newInstance->setName($dockerInstance)
                     ->setDockerImage($dockerInstance)

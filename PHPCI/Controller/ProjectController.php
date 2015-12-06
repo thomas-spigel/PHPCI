@@ -155,9 +155,10 @@ class ProjectController extends PHPCI\Controller
 
         $dockerImages = $store->getByProjectId($projectId);
 
-        foreach($dockerImages as $dockerImage)
+        foreach ($dockerImages as $dockerImage)
         {
-            $build = $this->buildService->createBuild($project, null, urldecode($branch), $email, null, ['docker' => $dockerImage->getId()]);
+            $this->buildService->createBuild($project, null, urldecode($branch),
+                $email, null, ['docker' => $dockerImage->getId()]);
         }
 
         $response = new b8\Http\Response\RedirectResponse();
@@ -274,7 +275,7 @@ class ProjectController extends PHPCI\Controller
 
             $project = $this->projectService->createProject($title, $type, $reference, $options);
 
-            $docker = $this->dockerService->updateDocker($project->getId(), $options);
+            $this->dockerService->updateDocker($project->getId(), $options);
 
             $response = new b8\Http\Response\RedirectResponse();
             $response->setHeader('Location', PHPCI_URL.'project/view/' . $project->getId());
@@ -346,9 +347,8 @@ class ProjectController extends PHPCI\Controller
 
         $project = $this->projectService->updateProject($project, $title, $type, $reference, $options);
 
-        $docker = $this->dockerService->updateDocker($project->getId(), $options);
+        $this->dockerService->updateDocker($project->getId(), $options);
 
-//        die();
         $response = new b8\Http\Response\RedirectResponse();
         $response->setHeader('Location', PHPCI_URL.'project/view/' . $project->getId());
         return $response;
@@ -427,22 +427,8 @@ class ProjectController extends PHPCI\Controller
         $field->setOptions($groups);
         $form->addField($field);
 
-        $container = new Form\Element\CheckboxGroup('docker-instances');
-        $container->setLabel("Docker Instances");
-        $container->setClass('form-group');
 
-        $field = Form\Element\Checkbox::create('php:5.4-apache', 'PHP version 5.4 with apache');
-        $field->setCheckedValue('php:5.4-apache');
-        $container->addField($field);
-        $field = Form\Element\Checkbox::create('php:5.5-apache', 'PHP version 5.5 with apache');
-        $field->setCheckedValue('php:5.5-apache');
-        $container->addField($field);
-        $field = Form\Element\Checkbox::create('php:5.6-apache', 'PHP version 5.6 with apache');
-        $field->setCheckedValue('php:5.6-apache');
-        $container->addField($field);
-        $field = Form\Element\Checkbox::create('php:7.0-apache', 'PHP version 7.0 with apache');
-        $field->setCheckedValue('php:7.0-apache');
-        $container->addField($field);
+        $container = $this->_getDockerContainer();
         $form->addField($container);
 
 
@@ -466,6 +452,28 @@ class ProjectController extends PHPCI\Controller
 
         $form->setValues($values);
         return $form;
+    }
+
+    protected function _getDockerContainer()
+    {
+        $container = new Form\Element\CheckboxGroup('docker-instances');
+        $container->setLabel("Docker Instances");
+        $container->setClass('form-group');
+
+        $field = Form\Element\Checkbox::create('php:5.4-apache', 'PHP version 5.4 with apache');
+        $field->setCheckedValue('php:5.4-apache');
+        $container->addField($field);
+        $field = Form\Element\Checkbox::create('php:5.5-apache', 'PHP version 5.5 with apache');
+        $field->setCheckedValue('php:5.5-apache');
+        $container->addField($field);
+        $field = Form\Element\Checkbox::create('php:5.6-apache', 'PHP version 5.6 with apache');
+        $field->setCheckedValue('php:5.6-apache');
+        $container->addField($field);
+        $field = Form\Element\Checkbox::create('php:7.0-apache', 'PHP version 7.0 with apache');
+        $field->setCheckedValue('php:7.0-apache');
+        $container->addField($field);
+
+        return $container;
     }
 
     /**

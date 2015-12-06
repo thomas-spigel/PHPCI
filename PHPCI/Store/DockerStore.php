@@ -79,5 +79,4 @@ class DockerStore extends Store
         return $this;
 
     }
-
 }
