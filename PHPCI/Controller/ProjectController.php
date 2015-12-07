@@ -421,7 +421,7 @@ class ProjectController extends PHPCI\Controller
 
         $field->setOptions($groups);
         $form->addField($field);
-        
+
         if(\b8\Config::getInstance()->get('phpci.docker_settings.enable_docker_support') == 1) {
             $container = $this->getDockerContainer($values);
             $form->addField($container);

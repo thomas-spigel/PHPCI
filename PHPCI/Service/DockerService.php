@@ -33,4 +33,12 @@ class DockerService
         }
         return $this;
     }
+
+    public function deleteDockerImage(Docker $docker)
+    {
+        $this->dockerStore->deleteLinksByDockerId($docker->getId());
+        $this->dockerStore->delete($docker);
+
+        return $this;
+    }
 }

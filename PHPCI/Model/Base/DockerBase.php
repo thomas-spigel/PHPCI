@@ -38,6 +38,7 @@ class DockerBase extends Model
         'docker_image' => null,
         'dockerfile' => null,
         'created_date' => null,
+        'logs' => null,
     );
 
     /**
@@ -50,6 +51,7 @@ class DockerBase extends Model
         'docker_image' => 'getDockerImage',
         'dockerfile' => 'getDockerfile',
         'created_date' => 'getCreatedDate',
+        'logs' => 'getLogs',
 
         // Foreign key getters:
     );
@@ -64,6 +66,7 @@ class DockerBase extends Model
         'docker_image' => 'setDockerImage',
         'dockerfile' => 'setDockerfile',
         'created_date' => 'setCreatedDate',
+        'logs' => 'setLogs',
 
         // Foreign key setters:
     );
@@ -98,6 +101,11 @@ class DockerBase extends Model
         ),
         'created_date' => array(
             'type' => 'datetime',
+            'default' => null,
+        ),
+        'logs' => array(
+            'type' => 'text',
+            'nullable' => true,
             'default' => null,
         ),
     );
@@ -176,6 +184,18 @@ class DockerBase extends Model
             $rtn    = new \DateTime($rtn);
         }
         
+        return $rtn;
+    }
+
+    /**
+    * Get the value of Logs / logs.
+    *
+    * @return string
+    */
+    public function getLogs()
+    {
+        $rtn    = $this->data['logs'];
+
         return $rtn;
     }
 
@@ -271,5 +291,23 @@ class DockerBase extends Model
         $this->data['created_date'] = $value;
 
         $this->_setModified('created_date');
+    }
+
+    /**
+    * Set the value of Logs / logs.
+    *
+    * @param $value string
+    */
+    public function setLogs($value)
+    {
+        $this->_validateString('Logs', $value);
+
+        if ($this->data['logs'] === $value) {
+            return;
+        }
+
+        $this->data['logs'] = $value;
+
+        $this->_setModified('logs');
     }
 }

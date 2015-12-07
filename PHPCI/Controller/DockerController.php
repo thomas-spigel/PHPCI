@@ -15,6 +15,7 @@ use b8\Http\Response\JsonResponse;
 use PHPCI\BuildFactory;
 use PHPCI\Helper\AnsiConverter;
 use PHPCI\Helper\Lang;
+use PHPCI\Model\Docker;
 use PHPCI\Service\DockerService;
 
 /**
@@ -78,8 +79,10 @@ class DockerController extends \PHPCI\Controller
 
         $build = Lang::get('docker_image_build');
         $buildLink = PHPCI_URL . 'docker/build/' . $image->getId();
-        $delete = Lang::get('delete_image');
+        $delete = Lang::get('docker_delete_image');
         $deleteLink = PHPCI_URL . 'docker/delete/' . $image->getId();
+
+        $this->view->logs = $this->getLogsForOutput($image);
 
         $actions = '';
         if ($this->currentUserIsAdmin()) {
@@ -88,28 +91,74 @@ class DockerController extends \PHPCI\Controller
         }
 
         $this->layout->actions = $actions;
+
     }
 
     /**
     * Delete a docker image.
     */
-    public function delete($buildId)
+    public function delete($imageId)
     {
         $this->requireAdmin();
 
-        $build = BuildFactory::getBuildById($buildId);
-
-        if (empty($build)) {
-            throw new NotFoundException(Lang::get('build_x_not_found', $buildId));
+        /** @var Docker $image */
+        $image = b8\Store\Factory::getStore('Docker')->getByPrimaryKey($imageId);
+        if (empty($image)) {
+            throw new NotFoundException(Lang::get('docker_image_x_not_found', $imageId));
         }
 
-        $this->buildService->deleteBuild($build);
+        $this->dockerService->deleteDockerImage($image);
 
         $response = new b8\Http\Response\RedirectResponse();
-        $response->setHeader('Location', PHPCI_URL.'project/view/' . $build->getProjectId());
+        $response->setHeader('Location', PHPCI_URL.'docker');
         return $response;
     }
 
+
+    public function build($imageId)
+    {
+//        echo $imageId;die();
+
+        $image = $this->dockerStore->getByPrimaryKey($imageId);
+
+        file_put_contents('/tmp/testDockerFile', $image->getDockerfile());
+
+//        echo 'docker build -t ' . $image->getDockerImage() . ' - < /tmp/testDockerFile';die();
+
+        $log = '[!] Running: \'docker build  -t ' . $image->getDockerImage() . ' - < /tmp/testDockerFile\'' . "\n";
+        $log .= shell_exec('docker build  -t ' . $image->getDockerImage() . ' - < /tmp/testDockerFile');
+
+
+        $logsToSave = [];
+        if($image->getLogs()) {
+            $logsToSave = unserialize($image->getLogs());
+        }
+
+         $logsToSave[] = [
+            'build_date' => date('Y-m-d H:i:s'),
+            'data' => $log
+        ];
+
+        $image->setLogs(serialize($logsToSave));
+        $this->dockerStore->save($image);
+
+        $response = new b8\Http\Response\RedirectResponse();
+        $response->setHeader('Location', PHPCI_URL.'docker/view/' .$image->getId());
+        return $response;
+    }
+
+    protected function getLogsForOutput($image)
+    {
+        $output = '';
+        if($image->getLogs()) {
+            foreach (unserialize($image->getLogs()) as $log) {
+                $output .= "*********** BUILD DATE: " . $log['build_date'] . " ***********\n" .
+                    $log['data'] . "\n*********** END OF BUILD LOG ***********\n\n\n";
+            }
+        }
+
+        return $output;
+    }
     /**
     * Parse log for unix colours and replace with HTML.
     */

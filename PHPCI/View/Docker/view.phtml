@@ -1,1 +1,63 @@
-Hello world!
+<?php use PHPCI\Helper\Lang; ?>
+
+<div class="row">
+    <div class="col-sm-4">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">
+                    Image Details
+                </h3>
+            </div>
+
+            <div class="box-body no-padding">
+                <table class="table">
+                    <tr>
+                        <th>Name</th>
+                        <td style="text-align: right">
+                            <?php echo $image->getName();?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Image tag/name</th>
+                        <td style="text-align: right">
+                            <?php echo $image->getDockerImage();?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-8">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">
+                    Buildfile
+                </h3>
+            </div>
+
+            <div class="box-body no-padding">
+                <pre style="margin-left:10px; margin-right:10px; overflow-y: auto;"><?php echo $image->getDockerfile();?></pre>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+<div class="nav-tabs-custom">
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#log" data-toggle="tab"><i class="fa fa-cogs"></i> <?php print Lang::get('build_log'); ?></a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="log">
+            <pre style="height: 400px; overflow-y: auto;"><?php print $logs; ?></pre>
+        </div>
+    </div>
+</div>
+

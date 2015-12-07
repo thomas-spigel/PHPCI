@@ -440,4 +440,10 @@ PHPCI',
     'behat' => 'Behat',
     'technical_debt' => 'Technical Debt',
 
+
+    'docker_image_n' => 'Docker Image #%s',
+    'docker_image_build' => 'Build this Image',
+    'docker_image_x_not_found' => 'Docker Image %s not found',
+    'docker_delete_image' => 'Delete'
+
 );
